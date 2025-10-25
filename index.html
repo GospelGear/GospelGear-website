@@ -1,0 +1,2894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faith Threads - Christian Apparel Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .category-btn {
+            background: white;
+            border: none;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(0);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .category-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .category-btn:hover::before {
+            left: 100%;
+        }
+        
+        .category-btn:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        
+        .category-btn.active {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+        }
+        
+        .product-card {
+            transition: all 0.3s ease;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .cart-sidebar {
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .cart-sidebar.open {
+            transform: translateX(0);
+        }
+        
+        .admin-tab.active {
+            border-bottom: 2px solid #8b5cf6;
+            color: #8b5cf6;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% {
+                transform: translate3d(0,0,0);
+            }
+            40%, 43% {
+                transform: translate3d(0,-8px,0);
+            }
+            70% {
+                transform: translate3d(0,-4px,0);
+            }
+            90% {
+                transform: translate3d(0,-2px,0);
+            }
+        }
+        
+        .category-btn:active {
+            animation: bounce 0.6s;
+        }
+        
+        @media (max-width: 768px) {
+            .cart-sidebar {
+                width: 100% !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+            <h1 class="text-2xl font-bold text-purple-600">Faith Threads</h1>
+            
+            <nav class="hidden md:flex space-x-6">
+                <a href="#home" class="text-gray-700 hover:text-purple-600 transition duration-300">Home</a>
+                <a href="#products" class="text-gray-700 hover:text-purple-600 transition duration-300">Products</a>
+                <a href="#about" class="text-gray-700 hover:text-purple-600 transition duration-300">About</a>
+                <a href="#contact" class="text-gray-700 hover:text-purple-600 transition duration-300">Contact</a>
+            </nav>
+            
+            <div class="flex items-center space-x-4">
+                <!-- Search -->
+                <div class="relative hidden md:block">
+                    <input type="text" placeholder="Search products..." 
+                           class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                           onkeyup="searchProducts(this.value)">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+                
+                <!-- Wishlist -->
+                <button class="relative p-2 text-gray-600 hover:text-purple-600 transition duration-300">
+                    <i class="fas fa-heart text-xl"></i>
+                    <span id="wishlistCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+                </button>
+                
+                <!-- Cart -->
+                <button onclick="openCart()" class="relative p-2 text-gray-600 hover:text-purple-600 transition duration-300">
+                    <i class="fas fa-shopping-cart text-xl"></i>
+                    <span id="cartCount" class="absolute -top-2 -right-2 bg-purple-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+                </button>
+                
+                <!-- Order Tracking -->
+                <button onclick="openTrackingModal()" class="hidden md:block bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition duration-300">
+                    <i class="fas fa-truck mr-2"></i>Track Order
+                </button>
+
+            <!-- Admin Password Modal -->
+    <div id="adminPasswordModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg max-w-md w-full p-6">
+            <div class="text-center mb-6">
+                <i class="fas fa-lock text-4xl text-gray-400 mb-4"></i>
+                <h3 class="text-xl font-bold text-gray-800">Admin Access Required</h3>
+                <p class="text-gray-600 mt-2">Please enter the admin password to continue</p>
+            </div>
+            
+            <form onsubmit="checkAdminPassword(event)" class="space-y-4">
+                <div>
+                    <label for="adminPassword" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input type="password" id="adminPassword" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                           placeholder="Enter admin password" required>
+                </div>
+                
+                <div id="passwordError" class="text-red-500 text-sm hidden">
+                    Incorrect password. Please try again.
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button type="button" onclick="closeAdminPasswordModal()" 
+                            class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition duration-300">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-300">
+                        Access Admin
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+                <!-- Admin Panel -->
+                <button onclick="openAdminPanel()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition duration-300">
+                    <i class="fas fa-cog mr-2"></i>Admin
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Search -->
+        <div class="md:hidden px-4 pb-4">
+            <div class="relative">
+                <input type="text" placeholder="Search products..." 
+                       class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                       onkeyup="searchProducts(this.value)">
+                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-gradient text-white py-20">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-4xl md:text-6xl font-bold mb-6">Wear Your Faith</h2>
+            <p class="text-xl md:text-2xl mb-8 opacity-90">Inspiring Christian apparel for every believer</p>
+            <button onclick="scrollToProducts()" class="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-300">
+                Shop Now
+            </button>
+        </div>
+    </section>
+
+    <!-- Categories -->
+    <section class="py-12 bg-white">
+        <div class="container mx-auto px-4">
+            <h3 class="text-3xl font-bold text-center mb-8">Shop by Category</h3>
+            <div id="categories" class="flex flex-wrap justify-center gap-6 mb-8">
+                <!-- Categories will be populated by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products" class="py-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                <h3 class="text-3xl font-bold mb-4 md:mb-0">Our Products</h3>
+                <div class="flex items-center space-x-4">
+                    <label class="text-gray-600">Sort by:</label>
+                    <select onchange="sortProducts(this.value)" class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <option value="default">Default</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="newest">Newest First</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="productGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Products will be populated by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="bg-purple-600 text-white py-16">
+        <div class="container mx-auto px-4 text-center">
+            <h3 class="text-3xl font-bold mb-4">Stay Connected with Faith Threads</h3>
+            <p class="text-xl mb-8 opacity-90">Get exclusive offers, new product alerts, and inspiring content delivered to your inbox</p>
+            
+            <div class="max-w-md mx-auto">
+                <form onsubmit="handleNewsletterSignup(event)" class="flex flex-col sm:flex-row gap-3">
+                    <input 
+                        type="email" 
+                        placeholder="Enter your email address" 
+                        required 
+                        class="flex-1 px-4 py-3 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
+                        id="newsletterEmail">
+                    <button 
+                        type="submit" 
+                        class="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-300 whitespace-nowrap">
+                        <i class="fas fa-envelope mr-2"></i>Subscribe
+                    </button>
+                </form>
+                
+                <p class="text-sm mt-4 opacity-75">
+                    <i class="fas fa-lock mr-1"></i>
+                    We respect your privacy. Unsubscribe at any time.
+                </p>
+            </div>
+            
+            <!-- Social Proof -->
+            <div class="mt-8 flex items-center justify-center space-x-6 text-sm opacity-75">
+                <div class="flex items-center">
+                    <i class="fas fa-users mr-2"></i>
+                    <span id="subscriberCount">1,247</span> subscribers
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-star mr-2"></i>
+                    Weekly inspiration
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-gift mr-2"></i>
+                    Exclusive offers
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h4 class="text-xl font-bold mb-4">Faith Threads</h4>
+                    <p class="text-gray-300">Spreading faith through fashion. Quality Christian apparel for believers worldwide.</p>
+                </div>
+                <div>
+                    <h5 class="font-semibold mb-4">Quick Links</h5>
+                    <ul id="quickLinksFooter" class="space-y-2 text-gray-300">
+                        <li><a href="#home" class="hover:text-white transition duration-300">Home</a></li>
+                        <li><a href="#products" class="hover:text-white transition duration-300">Products</a></li>
+                        <li><a href="javascript:void(0)" onclick="showPage('about')" class="hover:text-white transition duration-300">About</a></li>
+                        <li><a href="javascript:void(0)" onclick="showPage('contact')" class="hover:text-white transition duration-300">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold mb-4">Customer Service</h5>
+                    <ul id="customerLinksFooter" class="space-y-2 text-gray-300">
+                        <li><a href="javascript:void(0)" onclick="showPage('size-guide')" class="hover:text-white transition duration-300">Size Guide</a></li>
+                        <li><a href="javascript:void(0)" onclick="showPage('shipping')" class="hover:text-white transition duration-300">Shipping Info</a></li>
+                        <li><a href="javascript:void(0)" onclick="showPage('returns')" class="hover:text-white transition duration-300">Returns</a></li>
+                        <li><a href="javascript:void(0)" onclick="showPage('faq')" class="hover:text-white transition duration-300">FAQ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold mb-4">Connect With Us</h5>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-300 hover:text-white transition duration-300"><i class="fab fa-facebook text-xl"></i></a>
+                        <a href="#" class="text-gray-300 hover:text-white transition duration-300"><i class="fab fa-instagram text-xl"></i></a>
+                        <a href="#" class="text-gray-300 hover:text-white transition duration-300"><i class="fab fa-twitter text-xl"></i></a>
+                        <a href="#" class="text-gray-300 hover:text-white transition duration-300"><i class="fab fa-youtube text-xl"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
+                <p>&copy; 2024 Faith Threads. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Sidebar -->
+    <div id="cartSidebar" class="cart-sidebar fixed top-0 right-0 h-full w-96 bg-white shadow-xl z-50 flex flex-col">
+        <div class="p-4 border-b flex items-center justify-between">
+            <h3 class="text-lg font-bold">Shopping Cart</h3>
+            <button onclick="closeCart()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <div id="cartItems" class="flex-1 overflow-y-auto p-4">
+            <!-- Cart items will be populated by JavaScript -->
+        </div>
+        
+        <div id="cartFooter" class="p-4 border-t hidden">
+            <div class="flex justify-between items-center mb-4">
+                <span class="font-semibold">Total:</span>
+                <span id="cartTotal" class="font-bold text-lg text-purple-600">$0.00</span>
+            </div>
+            <button onclick="proceedToCheckout()" class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition duration-300">
+                Proceed to Checkout
+            </button>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 id="modalTitle" class="text-2xl font-bold"></h3>
+                    <button onclick="closeProductModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <img id="modalImage" src="" alt="" class="w-full h-64 object-cover rounded-lg">
+                    </div>
+                    
+                    <div>
+                        <p id="modalPrice" class="text-2xl font-bold text-purple-600 mb-4"></p>
+                        <p id="modalDescription" class="text-gray-600 mb-6"></p>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold mb-2">Size:</label>
+                            <select id="sizeSelect" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <option value="XS">XS</option>
+                                <option value="S">S</option>
+                                <option value="M" selected>M</option>
+                                <option value="L">L</option>
+                                <option value="XL">XL</option>
+                                <option value="XXL">XXL</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-sm font-semibold mb-2">Quantity:</label>
+                            <div class="flex items-center space-x-3">
+                                <button onclick="decreaseQuantity()" class="bg-gray-200 text-gray-700 w-8 h-8 rounded-full hover:bg-gray-300 transition duration-300">-</button>
+                                <input id="quantityInput" type="number" value="1" min="1" class="w-16 text-center border rounded-lg py-1 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <button onclick="increaseQuantity()" class="bg-gray-200 text-gray-700 w-8 h-8 rounded-full hover:bg-gray-300 transition duration-300">+</button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex space-x-3">
+                            <button onclick="addToCart()" class="flex-1 bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition duration-300">
+                                <i class="fas fa-shopping-cart mr-2"></i>Add to Cart
+                            </button>
+                            <button id="wishlistModalBtn" onclick="toggleWishlist()" class="bg-gray-200 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-300 transition duration-300">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold">Checkout</h3>
+                    <button onclick="closeCheckoutModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form onsubmit="handleCheckout(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold mb-2">Full Name</label>
+                        <input type="text" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold mb-2">Email</label>
+                        <input type="email" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold mb-2">Phone Number</label>
+                        <input type="tel" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold mb-2">Address</label>
+                        <textarea required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold mb-2">Payment Method</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="radio" name="payment" value="card" checked class="mr-2">
+                                <i class="fas fa-credit-card mr-2"></i>Credit Card
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="payment" value="paypal" class="mr-2">
+                                <i class="fab fa-paypal mr-2"></i>PayPal
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="payment" value="mpesa" class="mr-2">
+                                <i class="fas fa-mobile-alt mr-2"></i>M-Pesa
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="font-semibold">Total:</span>
+                        <span id="checkoutTotal" class="font-bold text-lg text-purple-600">$0.00</span>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition duration-300 flex items-center justify-center">
+                        <span id="checkoutBtnText">Complete Order</span>
+                        <div id="checkoutSpinner" class="hidden">
+                            <i class="fas fa-spinner fa-spin ml-2"></i>
+                        </div>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- M-Pesa Payment Modal -->
+    <div id="mpesaModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg max-w-md w-full">
+            <div class="p-6">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-mobile-alt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2">M-Pesa Payment</h3>
+                    <p class="text-gray-600">Amount: <span id="mpesaAmount" class="font-semibold">KSh 0</span></p>
+                    <p class="text-gray-600">Reference: <span id="mpesaRef" class="font-semibold">FT-000000</span></p>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2">Phone Number</label>
+                    <div class="flex">
+                        <span class="bg-gray-100 border border-r-0 rounded-l-lg px-3 py-2 text-gray-600">+254</span>
+                        <input id="mpesaPhone" type="tel" placeholder="712345678" class="flex-1 border rounded-r-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+                </div>
+                
+                <button id="mpesaPayBtn" onclick="sendMpesaPrompt()" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition duration-300 mb-4">
+                    Send Payment Prompt
+                </button>
+                
+                <!-- Instructions -->
+                <div id="mpesaInstructions" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 hidden">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                        <span class="font-semibold text-blue-700">Payment prompt sent!</span>
+                    </div>
+                    <p class="text-blue-600 text-sm">Check your phone for the M-Pesa prompt and enter your PIN to complete the payment.</p>
+                </div>
+                
+                <!-- Payment Prompt Simulation -->
+                <div id="mpesaPrompt" class="bg-green-50 border border-green-200 rounded-lg p-4 hidden">
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-mobile-alt text-white"></i>
+                        </div>
+                        <h4 class="font-semibold text-green-700 mb-2">M-Pesa Prompt</h4>
+                        <p class="text-sm text-green-600 mb-2">Pay KSh <span id="promptAmount">0</span></p>
+                        <p class="text-sm text-green-600 mb-2">To: Faith Threads</p>
+                        <p class="text-sm text-green-600 mb-3">Ref: <span id="promptRef">FT-000000</span></p>
+                        <div class="flex items-center justify-center">
+                            <i class="fas fa-spinner fa-spin text-green-500 mr-2"></i>
+                            <span class="text-green-600 text-sm">Processing payment...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button onclick="closeMpesaModal()" class="w-full border border-gray-300 py-2 rounded-lg hover:bg-gray-50 transition duration-300">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg max-w-md w-full">
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-4 text-green-600">Order Confirmed!</h3>
+                <p class="text-gray-600 mb-4">Thank you for your purchase. Your order has been successfully placed.</p>
+                
+                <div class="bg-gray-50 rounded-lg p-4 mb-6 text-left">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-600">Order Number:</span>
+                        <span id="orderNumber" class="font-semibold">FT-000001</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-600">Transaction ID:</span>
+                        <span id="transactionId" class="font-semibold">TXN12345678</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-600">Amount Paid:</span>
+                        <span id="paidAmount" class="font-semibold">$0.00</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-600">Payment Method:</span>
+                        <span id="paymentMethod" class="font-semibold">Credit Card</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Estimated Delivery:</span>
+                        <span id="estimatedDelivery" class="font-semibold">Dec 25, 2024</span>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button onclick="trackOrder()" class="flex-1 bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition duration-300">
+                        Track Order
+                    </button>
+                    <button onclick="closeSuccessModal()" class="flex-1 border border-gray-300 py-2 rounded-lg hover:bg-gray-50 transition duration-300">
+                        Continue Shopping
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Tracking Modal -->
+    <div id="trackingModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold">Track Your Order</h3>
+                    <button onclick="closeTrackingModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="mb-6">
+                    <div class="flex space-x-3">
+                        <input id="trackingInput" type="text" placeholder="Enter order number (e.g., FT-000001)" class="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <button onclick="searchOrder()" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition duration-300">
+                            Track
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- No Order Found -->
+                <div id="noOrderFound" class="text-center py-8 hidden">
+                    <i class="fas fa-search text-4xl text-gray-400 mb-4"></i>
+                    <h4 class="text-xl font-semibold text-gray-600 mb-2">Order Not Found</h4>
+                    <p class="text-gray-500">Please check your order number and try again.</p>
+                </div>
+                
+                <!-- Order Information -->
+                <div id="orderInfo" class="hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Order Details -->
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <h4 class="text-lg font-semibold mb-4">Order Details</h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Order Number:</span>
+                                    <span id="trackOrderNumber" class="font-semibold">FT-000001</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Order Date:</span>
+                                    <span id="trackOrderDate" class="font-semibold">Dec 18, 2024</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Total Amount:</span>
+                                    <span id="trackOrderTotal" class="font-semibold">$47.98</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Estimated Delivery:</span>
+                                    <span id="trackEstimatedDelivery" class="font-semibold">Dec 25, 2024</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Tracking Number:</span>
+                                    <span id="trackingNumber" class="font-semibold">FE12345678</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Order Status Timeline -->
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <h4 class="text-lg font-semibold mb-4">Order Status</h4>
+                            <div id="statusTimeline">
+                                <!-- Timeline will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Order Items -->
+                    <div class="mt-6">
+                        <h4 class="text-lg font-semibold mb-4">Order Items</h4>
+                        <div id="trackingOrderItems" class="space-y-4">
+                            <!-- Items will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold">Admin Panel</h3>
+                    <button onclick="closeAdminPanel()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <!-- Admin Tabs -->
+                <div class="border-b mb-6">
+                    <nav class="flex space-x-8">
+                        <button onclick="switchAdminTab('products')" class="admin-tab py-2 px-1 border-b-2 border-purple-500 text-purple-600 font-medium">
+                            Products
+                        </button>
+                        <button onclick="switchAdminTab('categories')" class="admin-tab py-2 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                            Categories
+                        </button>
+                        <button onclick="switchAdminTab('subscribers')" class="admin-tab py-2 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                            Subscribers
+                        </button>
+                        <button onclick="switchAdminTab('content')" class="admin-tab py-2 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                            Content
+                        </button>
+                        <button onclick="switchAdminTab('pages')" class="admin-tab py-2 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                            Pages
+                        </button>
+                        <button onclick="switchAdminTab('settings')" class="admin-tab py-2 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                            Settings
+                        </button>
+                    </nav>
+                </div>
+                
+                <!-- Products Tab -->
+                <div id="adminProducts" class="admin-content">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="text-xl font-semibold">Manage Products</h4>
+                        <button onclick="showAddProduct()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition duration-300">
+                            <i class="fas fa-plus mr-2"></i>Add Product
+                        </button>
+                    </div>
+                    <div id="adminProductList" class="space-y-4">
+                        <!-- Products will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Categories Tab -->
+                <div id="adminCategories" class="admin-content hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="text-xl font-semibold">Manage Categories</h4>
+                        <button onclick="openCategoryModal()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition duration-300">
+                            <i class="fas fa-plus mr-2"></i>Add Category
+                        </button>
+                    </div>
+                    <div id="adminCategoryList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Categories will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Subscribers Tab -->
+                <div id="adminSubscribers" class="admin-content hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="text-xl font-semibold">Email Subscribers</h4>
+                        <div class="flex items-center space-x-4">
+                            <span class="text-gray-600">Total: <span id="totalSubscribers" class="font-semibold text-purple-600">0</span></span>
+                            <button onclick="exportSubscribers()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-300">
+                                <i class="fas fa-download mr-2"></i>Export CSV
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg border">
+                        <div class="p-4 border-b bg-gray-50">
+                            <div class="flex justify-between items-center">
+                                <input type="text" placeholder="Search subscribers..." onkeyup="searchSubscribers(this.value)" class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <div class="text-sm text-gray-600">
+                                    Showing <span id="subscriberCount">0</span> subscribers
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="subscribersList" class="divide-y">
+                            <!-- Subscribers will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pages Tab -->
+                <div id="adminPages" class="admin-content hidden">
+                    <h4 class="text-xl font-semibold mb-6">Manage Pages & Footer Links</h4>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Footer Links -->
+                        <div>
+                            <h5 class="text-lg font-semibold mb-4">Footer Links</h5>
+                            <div class="space-y-4">
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <h6 class="font-semibold mb-3">Quick Links</h6>
+                                    <div id="quickLinksEditor" class="space-y-2">
+                                        <!-- Quick links will be populated by JavaScript -->
+                                    </div>
+                                    <button onclick="addFooterLink('quick')" class="mt-3 text-purple-600 hover:text-purple-700 text-sm">
+                                        <i class="fas fa-plus mr-1"></i>Add Link
+                                    </button>
+                                </div>
+                                
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <h6 class="font-semibold mb-3">Customer Service</h6>
+                                    <div id="customerLinksEditor" class="space-y-2">
+                                        <!-- Customer service links will be populated by JavaScript -->
+                                    </div>
+                                    <button onclick="addFooterLink('customer')" class="mt-3 text-purple-600 hover:text-purple-700 text-sm">
+                                        <i class="fas fa-plus mr-1"></i>Add Link
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Page Content -->
+                        <div>
+                            <h5 class="text-lg font-semibold mb-4">Page Content</h5>
+                            <div class="space-y-4">
+                                <button onclick="editPage('about')" class="w-full text-left bg-white border rounded-lg p-4 hover:bg-gray-50 transition duration-300">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h6 class="font-semibold">About Us</h6>
+                                            <p class="text-sm text-gray-600">Company information and story</p>
+                                        </div>
+                                        <i class="fas fa-chevron-right text-gray-400"></i>
+                                    </div>
+                                </button>
+                                
+                                <button onclick="editPage('size-guide')" class="w-full text-left bg-white border rounded-lg p-4 hover:bg-gray-50 transition duration-300">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h6 class="font-semibold">Size Guide</h6>
+                                            <p class="text-sm text-gray-600">Sizing information for customers</p>
+                                        </div>
+                                        <i class="fas fa-chevron-right text-gray-400"></i>
+                                    </div>
+                                </button>
+                                
+                                <button onclick="editPage('shipping')" class="w-full text-left bg-white border rounded-lg p-4 hover:bg-gray-50 transition duration-300">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h6 class="font-semibold">Shipping Info</h6>
+                                            <p class="text-sm text-gray-600">Shipping policies and delivery times</p>
+                                        </div>
+                                        <i class="fas fa-chevron-right text-gray-400"></i>
+                                    </div>
+                                </button>
+                                
+                                <button onclick="editPage('returns')" class="w-full text-left bg-white border rounded-lg p-4 hover:bg-gray-50 transition duration-300">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h6 class="font-semibold">Returns Policy</h6>
+                                            <p class="text-sm text-gray-600">Return and exchange information</p>
+                                        </div>
+                                        <i class="fas fa-chevron-right text-gray-400"></i>
+                                    </div>
+                                </button>
+                                
+                                <button onclick="editPage('faq')" class="w-full text-left bg-white border rounded-lg p-4 hover:bg-gray-50 transition duration-300">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h6 class="font-semibold">FAQ</h6>
+                                            <p class="text-sm text-gray-600">Frequently asked questions</p>
+                                        </div>
+                                        <i class="fas fa-chevron-right text-gray-400"></i>
+                                    </div>
+                                </button>
+                                
+                                <button onclick="editPage('contact')" class="w-full text-left bg-white border rounded-lg p-4 hover:bg-gray-50 transition duration-300">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h6 class="font-semibold">Contact Info</h6>
+                                            <p class="text-sm text-gray-600">Contact details and support</p>
+                                        </div>
+                                        <i class="fas fa-chevron-right text-gray-400"></i>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Content Tab -->
+                <div id="adminContent" class="admin-content hidden">
+                    <h4 class="text-xl font-semibold mb-6">Manage Content</h4>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Store Name</label>
+                            <input id="storeName" type="text" value="Faith Threads" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Hero Title</label>
+                            <input id="heroTitle" type="text" value="Wear Your Faith" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Hero Subtitle</label>
+                            <input id="heroSubtitle" type="text" value="Inspiring Christian apparel for every believer" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Footer Description</label>
+                            <textarea id="footerDesc" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" rows="3">Spreading faith through fashion. Quality Christian apparel for believers worldwide.</textarea>
+                        </div>
+                        <button onclick="saveContent()" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition duration-300">
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Settings Tab -->
+                <div id="adminSettings" class="admin-content hidden">
+                    <h4 class="text-xl font-semibold mb-6">Store Settings</h4>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Currency</label>
+                            <select id="currency" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <option value="USD">USD ($)</option>
+                                <option value="EUR">EUR (€)</option>
+                                <option value="GBP">GBP (£)</option>
+                                <option value="KES">KES (KSh)</option>
+                                <option value="NGN">NGN (₦)</option>
+                                <option value="ZAR">ZAR (R)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Tax Rate (%)</label>
+                            <input id="taxRate" type="number" value="8.5" step="0.1" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Shipping Cost (USD)</label>
+                            <input id="shippingCost" type="number" value="5.99" step="0.01" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <button onclick="saveSettings()" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition duration-300">
+                            Save Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Form Modal -->
+    <div id="productFormModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 id="productFormTitle" class="text-2xl font-bold">Add New Product</h3>
+                    <button onclick="closeProductForm()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form id="productForm" onsubmit="handleProductForm(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold mb-2">Product Name</label>
+                        <input name="productName" type="text" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold mb-2">Price (USD)</label>
+                        <input name="productPrice" type="number" step="0.01" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold mb-2">Category</label>
+                        <select name="productCategory" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <option value="verses">Bible Verses</option>
+                            <option value="inspirational">Inspirational</option>
+                            <option value="youth">Youth</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold mb-2">Description</label>
+                        <textarea name="productDescription" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold mb-2">Product Image</label>
+                        <div id="imageUpload" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                            <input id="productImage" type="file" accept="image/*" onchange="handleImageUpload(this)" class="hidden">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                            <p class="text-gray-600 mb-2">Click to upload image</p>
+                            <button type="button" onclick="document.getElementById('productImage').click()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition duration-300">
+                                Choose File
+                            </button>
+                        </div>
+                        <div id="imagePreview" class="hidden mt-4">
+                            <img id="previewImg" src="" alt="Preview" class="w-full h-48 object-cover rounded-lg">
+                            <button type="button" onclick="removeImage()" class="mt-2 text-red-600 hover:text-red-700">
+                                <i class="fas fa-trash mr-1"></i>Remove Image
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition duration-300">
+                        <span id="productFormSubmitText">Add Product</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div id="categoryModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg max-w-md w-full">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold">Add New Category</h3>
+                    <button onclick="closeCategoryModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form onsubmit="handleCategoryForm(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold mb-2">Category Name</label>
+                        <input name="categoryName" type="text" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="categoryIcon" class="block text-sm font-medium text-gray-700 mb-2">Icon</label>
+                        <select id="categoryIcon" name="categoryIcon" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500">
+                            <option value="fas fa-star">⭐ Star</option>
+                            <option value="fas fa-heart">❤️ Heart</option>
+                            <option value="fas fa-cross">✝️ Cross</option>
+                            <option value="fas fa-praying-hands">🙏 Praying Hands</option>
+                            <option value="fas fa-church">⛪ Church</option>
+                            <option value="fas fa-dove">🕊️ Dove</option>
+                            <option value="fas fa-crown">👑 Crown</option>
+                            <option value="fas fa-fire">🔥 Fire</option>
+                            <option value="fas fa-mountain">🏔️ Mountain</option>
+                            <option value="fas fa-sun">☀️ Sun</option>
+                            <option value="fas fa-moon">🌙 Moon</option>
+                            <option value="fas fa-leaf">🍃 Leaf</option>
+                            <option value="fas fa-anchor">⚓ Anchor</option>
+                            <option value="fas fa-shield-alt">🛡️ Shield</option>
+                            <option value="fas fa-music">🎵 Music</option>
+                            <option value="fas fa-book">📖 Book</option>
+                            <option value="fas fa-globe">🌍 Globe</option>
+                            <option value="fas fa-hands">🤲 Hands</option>
+                            <option value="fas fa-fish">🐟 Fish</option>
+                            <option value="fas fa-tree">🌳 Tree</option>
+                            <option value="fas fa-gift">🎁 Gift</option>
+                            <option value="fas fa-bell">🔔 Bell</option>
+                            <option value="fas fa-candle-holder">🕯️ Candle</option>
+                            <option value="fas fa-bread-slice">🍞 Bread</option>
+                            <option value="fas fa-wine-glass">🍷 Wine</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label for="categoryColor" class="block text-sm font-medium text-gray-700 mb-2">Color Theme</label>
+                        <select id="categoryColor" name="categoryColor" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500">
+                            <option value="purple">Purple</option>
+                            <option value="blue">Blue</option>
+                            <option value="green">Green</option>
+                            <option value="yellow">Yellow</option>
+                            <option value="red">Red</option>
+                            <option value="pink">Pink</option>
+                            <option value="indigo">Indigo</option>
+                            <option value="teal">Teal</option>
+                            <option value="orange">Orange</option>
+                            <option value="gray">Gray</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition duration-300">
+                        Add Category
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Editor Modal -->
+    <div id="pageEditorModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 id="pageEditorTitle" class="text-2xl font-bold">Edit Page</h3>
+                    <button onclick="closePageEditor()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form id="pageEditorForm" onsubmit="savePageContent(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold mb-2">Page Title</label>
+                        <input id="pageTitle" type="text" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold mb-2">Content</label>
+                        <textarea id="pageContent" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" rows="15" placeholder="Enter your content here..."></textarea>
+                        <p class="text-sm text-gray-600 mt-2">You can use basic HTML tags like &lt;p&gt;, &lt;h3&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;strong&gt;, &lt;em&gt; for formatting.</p>
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <button type="submit" class="flex-1 bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition duration-300">
+                            Save Changes
+                        </button>
+                        <button type="button" onclick="previewPage()" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition duration-300">
+                            Preview
+                        </button>
+                        <button type="button" onclick="closePageEditor()" class="border border-gray-300 px-6 py-3 rounded-lg hover:bg-gray-50 transition duration-300">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Preview Modal -->
+    <div id="pagePreviewModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold">Page Preview</h3>
+                    <button onclick="closePagePreview()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="border rounded-lg p-6 bg-gray-50">
+                    <h1 id="previewTitle" class="text-3xl font-bold mb-6 text-purple-600"></h1>
+                    <div id="previewContent" class="prose max-w-none">
+                        <!-- Preview content will be populated here -->
+                    </div>
+                </div>
+                
+                <div class="mt-6 flex justify-end">
+                    <button onclick="closePagePreview()" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition duration-300">
+                        Close Preview
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Display Modal -->
+    <div id="pageDisplayModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 id="displayTitle" class="text-2xl font-bold text-purple-600"></h3>
+                    <button onclick="closePageDisplay()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div id="displayContent" class="prose max-w-none">
+                    <!-- Page content will be displayed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let emailSubscribers = [];
+        let products = [
+            {
+                id: 1,
+                name: "Faith Over Fear",
+                price: 24.99,
+                image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%23667eea'/%3E%3Ctext x='150' y='140' font-family='Arial, sans-serif' font-size='24' font-weight='bold' text-anchor='middle' fill='white'%3EFaith Over%3C/text%3E%3Ctext x='150' y='170' font-family='Arial, sans-serif' font-size='24' font-weight='bold' text-anchor='middle' fill='white'%3EFear%3C/text%3E%3C/svg%3E",
+                category: "inspirational",
+                description: "Inspire others with this powerful message of faith conquering fear.",
+                rating: 4.8
+            },
+            {
+                id: 2,
+                name: "John 3:16 Classic",
+                price: 22.99,
+                image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%23764ba2'/%3E%3Ctext x='150' y='140' font-family='Arial, sans-serif' font-size='20' font-weight='bold' text-anchor='middle' fill='white'%3EJohn 3:16%3C/text%3E%3Ctext x='150' y='170' font-family='Arial, sans-serif' font-size='16' text-anchor='middle' fill='white'%3EClassic%3C/text%3E%3C/svg%3E",
+                category: "verses",
+                description: "The most beloved Bible verse beautifully displayed on premium fabric.",
+                rating: 4.9
+            },
+            {
+                id: 3,
+                name: "Blessed & Grateful",
+                price: 26.99,
+                image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%2348bb78'/%3E%3Ctext x='150' y='140' font-family='Arial, sans-serif' font-size='20' font-weight='bold' text-anchor='middle' fill='white'%3EBlessed %26%3C/text%3E%3Ctext x='150' y='170' font-family='Arial, sans-serif' font-size='20' font-weight='bold' text-anchor='middle' fill='white'%3EGrateful%3C/text%3E%3C/svg%3E",
+                category: "inspirational",
+                description: "Remind yourself and others of life's blessings with this uplifting design.",
+                rating: 4.7
+            },
+            {
+                id: 4,
+                name: "Proverbs 31 Woman",
+                price: 28.99,
+                image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%23ed64a6'/%3E%3Ctext x='150' y='140' font-family='Arial, sans-serif' font-size='18' font-weight='bold' text-anchor='middle' fill='white'%3EProverbs 31%3C/text%3E%3Ctext x='150' y='170' font-family='Arial, sans-serif' font-size='18' font-weight='bold' text-anchor='middle' fill='white'%3EWoman%3C/text%3E%3C/svg%3E",
+                category: "verses",
+                description: "Celebrate the strength and virtue of the Proverbs 31 woman.",
+                rating: 4.8
+            },
+            {
+                id: 5,
+                name: "Jesus Saves",
+                price: 23.99,
+                image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%23f6ad55'/%3E%3Ctext x='150' y='140' font-family='Arial, sans-serif' font-size='24' font-weight='bold' text-anchor='middle' fill='white'%3EJesus%3C/text%3E%3Ctext x='150' y='170' font-family='Arial, sans-serif' font-size='24' font-weight='bold' text-anchor='middle' fill='white'%3ESaves%3C/text%3E%3C/svg%3E",
+                category: "youth",
+                description: "Share the gospel message with this simple yet powerful statement.",
+                rating: 4.9
+            },
+            {
+                id: 6,
+                name: "God's Got This",
+                price: 25.99,
+                image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%2338b2ac'/%3E%3Ctext x='150' y='140' font-family='Arial, sans-serif' font-size='20' font-weight='bold' text-anchor='middle' fill='white'%3EGod's Got%3C/text%3E%3Ctext x='150' y='170' font-family='Arial, sans-serif' font-size='20' font-weight='bold' text-anchor='middle' fill='white'%3EThis%3C/text%3E%3C/svg%3E",
+                category: "inspirational",
+                description: "Trust in God's plan with this comforting reminder.",
+                rating: 4.6
+            }
+        ];
+
+        let categories = [
+            { id: 'all', name: 'All Products', icon: 'fas fa-th-large', color: '#8b5cf6' },
+            { id: 'verses', name: 'Bible Verses', icon: 'fas fa-book', color: '#10b981' },
+            { id: 'inspirational', name: 'Inspirational', icon: 'fas fa-heart', color: '#f59e0b' },
+            { id: 'youth', name: 'Youth', icon: 'fas fa-star', color: '#ef4444' }
+        ];
+
+        let filteredProducts = [...products];
+        let cart = [];
+        let wishlist = [];
+        let orders = [];
+        let currentProduct = null;
+        let currentOrderNumber = null;
+        let editingProductId = null;
+        let currentEditingPage = null;
+
+        // Page content storage
+        let pageContent = {
+            'about': {
+                title: 'About Faith Threads',
+                content: `<p>Welcome to Faith Threads, where fashion meets faith! We are a Christian apparel company dedicated to spreading God's love through inspiring and stylish clothing.</p>
+
+<h3>Our Mission</h3>
+<p>Our mission is to create high-quality, comfortable apparel that allows believers to wear their faith proudly and share the Gospel through fashion. Every design is carefully crafted to inspire, encourage, and start meaningful conversations about faith.</p>
+
+<h3>Our Story</h3>
+<p>Founded in 2020, Faith Threads began as a small dream to combine our love for fashion with our passion for sharing Christ's message. What started as a few t-shirt designs has grown into a full collection of faith-based apparel for men, women, and youth.</p>
+
+<h3>Our Values</h3>
+<ul>
+<li><strong>Faith First:</strong> Everything we do is rooted in our Christian faith and values</li>
+<li><strong>Quality:</strong> We use only the finest materials and printing techniques</li>
+<li><strong>Community:</strong> We believe in building a community of believers who support one another</li>
+<li><strong>Service:</strong> A portion of our profits goes to Christian missions and charities</li>
+</ul>
+
+<p>Thank you for choosing Faith Threads. May God bless you as you wear your faith!</p>`
+            },
+            'size-guide': {
+                title: 'Size Guide',
+                content: `<p>Find your perfect fit with our comprehensive size guide. All measurements are in inches.</p>
+
+<h3>Men's T-Shirts</h3>
+<table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+<tr style="background-color: #f3f4f6;">
+<th style="border: 1px solid #d1d5db; padding: 8px;">Size</th>
+<th style="border: 1px solid #d1d5db; padding: 8px;">Chest</th>
+<th style="border: 1px solid #d1d5db; padding: 8px;">Length</th>
+<th style="border: 1px solid #d1d5db; padding: 8px;">Sleeve</th>
+</tr>
+<tr><td style="border: 1px solid #d1d5db; padding: 8px;">XS</td><td style="border: 1px solid #d1d5db; padding: 8px;">34-36</td><td style="border: 1px solid #d1d5db; padding: 8px;">27</td><td style="border: 1px solid #d1d5db; padding: 8px;">8</td></tr>
+<tr><td style="border: 1px solid #d1d5db; padding: 8px;">S</td><td style="border: 1px solid #d1d5db; padding: 8px;">36-38</td><td style="border: 1px solid #d1d5db; padding: 8px;">28</td><td style="border: 1px solid #d1d5db; padding: 8px;">8.5</td></tr>
+<tr><td style="border: 1px solid #d1d5db; padding: 8px;">M</td><td style="border: 1px solid #d1d5db; padding: 8px;">38-40</td><td style="border: 1px solid #d1d5db; padding: 8px;">29</td><td style="border: 1px solid #d1d5db; padding: 8px;">9</td></tr>
+<tr><td style="border: 1px solid #d1d5db; padding: 8px;">L</td><td style="border: 1px solid #d1d5db; padding: 8px;">40-42</td><td style="border: 1px solid #d1d5db; padding: 8px;">30</td><td style="border: 1px solid #d1d5db; padding: 8px;">9.5</td></tr>
+<tr><td style="border: 1px solid #d1d5db; padding: 8px;">XL</td><td style="border: 1px solid #d1d5db; padding: 8px;">42-44</td><td style="border: 1px solid #d1d5db; padding: 8px;">31</td><td style="border: 1px solid #d1d5db; padding: 8px;">10</td></tr>
+<tr><td style="border: 1px solid #d1d5db; padding: 8px;">XXL</td><td style="border: 1px solid #d1d5db; padding: 8px;">44-46</td><td style="border: 1px solid #d1d5db; padding: 8px;">32</td><td style="border: 1px solid #d1d5db; padding: 8px;">10.5</td></tr>
+</table>
+
+<h3>Women's T-Shirts</h3>
+<table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+<tr style="background-color: #f3f4f6;">
+<th style="border: 1px solid #d1d5db; padding: 8px;">Size</th>
+<th style="border: 1px solid #d1d5db; padding: 8px;">Bust</th>
+<th style="border: 1px solid #d1d5db; padding: 8px;">Length</th>
+<th style="border: 1px solid #d1d5db; padding: 8px;">Sleeve</th>
+</tr>
+<tr><td style="border: 1px solid #d1d5db; padding: 8px;">XS</td><td style="border: 1px solid #d1d5db; padding: 8px;">32-34</td><td style="border: 1px solid #d1d5db; padding: 8px;">25</td><td style="border: 1px solid #d1d5db; padding: 8px;">7</td></tr>
+<tr><td style="border: 1px solid #d1d5db; padding: 8px;">S</td><td style="border: 1px solid #d1d5db; padding: 8px;">34-36</td><td style="border: 1px solid #d1d5db; padding: 8px;">26</td><td style="border: 1px solid #d1d5db; padding: 8px;">7.5</td></tr>
+<tr><td style="border: 1px solid #d1d5db; padding: 8px;">M</td><td style="border: 1px solid #d1d5db; padding: 8px;">36-38</td><td style="border: 1px solid #d1d5db; padding: 8px;">27</td><td style="border: 1px solid #d1d5db; padding: 8px;">8</td></tr>
+<tr><td style="border: 1px solid #d1d5db; padding: 8px;">L</td><td style="border: 1px solid #d1d5db; padding: 8px;">38-40</td><td style="border: 1px solid #d1d5db; padding: 8px;">28</td><td style="border: 1px solid #d1d5db; padding: 8px;">8.5</td></tr>
+<tr><td style="border: 1px solid #d1d5db; padding: 8px;">XL</td><td style="border: 1px solid #d1d5db; padding: 8px;">40-42</td><td style="border: 1px solid #d1d5db; padding: 8px;">29</td><td style="border: 1px solid #d1d5db; padding: 8px;">9</td></tr>
+<tr><td style="border: 1px solid #d1d5db; padding: 8px;">XXL</td><td style="border: 1px solid #d1d5db; padding: 8px;">42-44</td><td style="border: 1px solid #d1d5db; padding: 8px;">30</td><td style="border: 1px solid #d1d5db; padding: 8px;">9.5</td></tr>
+</table>
+
+<h3>How to Measure</h3>
+<ul>
+<li><strong>Chest/Bust:</strong> Measure around the fullest part of your chest/bust</li>
+<li><strong>Length:</strong> Measure from the highest point of the shoulder to the bottom hem</li>
+<li><strong>Sleeve:</strong> Measure from the shoulder seam to the end of the sleeve</li>
+</ul>
+
+<p><em>Still unsure about sizing? Contact our customer service team for personalized assistance!</em></p>`
+            },
+            'shipping': {
+                title: 'Shipping Information',
+                content: `<h3>Shipping Options</h3>
+<p>We offer several shipping options to meet your needs:</p>
+
+<ul>
+<li><strong>Standard Shipping (5-7 business days):</strong> $5.99</li>
+<li><strong>Express Shipping (2-3 business days):</strong> $12.99</li>
+<li><strong>Overnight Shipping (1 business day):</strong> $24.99</li>
+<li><strong>Free Standard Shipping:</strong> On orders over $75</li>
+</ul>
+
+<h3>Processing Time</h3>
+<p>All orders are processed within 1-2 business days. Custom orders may take additional time.</p>
+
+<h3>International Shipping</h3>
+<p>We currently ship to the following countries:</p>
+<ul>
+<li>United States</li>
+<li>Canada</li>
+<li>United Kingdom</li>
+<li>Australia</li>
+<li>Kenya</li>
+<li>Nigeria</li>
+<li>South Africa</li>
+</ul>
+
+<p>International shipping rates vary by destination and will be calculated at checkout.</p>
+
+<h3>Order Tracking</h3>
+<p>Once your order ships, you'll receive a tracking number via email. You can also track your order using our order tracking tool.</p>
+
+<h3>Shipping Restrictions</h3>
+<p>We cannot ship to P.O. boxes for express or overnight delivery. Standard shipping to P.O. boxes is available.</p>`
+            },
+            'returns': {
+                title: 'Returns & Exchanges',
+                content: `<h3>Return Policy</h3>
+<p>We want you to be completely satisfied with your Faith Threads purchase. If you're not happy with your order, we offer easy returns and exchanges.</p>
+
+<h3>Return Window</h3>
+<p>You have <strong>30 days</strong> from the date of delivery to return or exchange your items.</p>
+
+<h3>Return Conditions</h3>
+<p>Items must be:</p>
+<ul>
+<li>Unworn and unwashed</li>
+<li>In original condition with all tags attached</li>
+<li>Returned in original packaging</li>
+<li>Free from any odors (perfume, smoke, etc.)</li>
+</ul>
+
+<h3>How to Return</h3>
+<ol>
+<li>Contact our customer service team to initiate a return</li>
+<li>Print the prepaid return label we'll email you</li>
+<li>Package your items securely</li>
+<li>Drop off at any authorized shipping location</li>
+</ol>
+
+<h3>Refund Processing</h3>
+<p>Refunds are processed within 5-7 business days after we receive your return. The refund will be credited to your original payment method.</p>
+
+<h3>Exchanges</h3>
+<p>For size or color exchanges, follow the same return process and place a new order for your desired item.</p>
+
+<h3>Final Sale Items</h3>
+<p>Items marked as "Final Sale" cannot be returned or exchanged.</p>
+
+<h3>Damaged or Defective Items</h3>
+<p>If you receive a damaged or defective item, please contact us immediately. We'll provide a prepaid return label and send a replacement at no charge.</p>`
+            },
+            'faq': {
+                title: 'Frequently Asked Questions',
+                content: `<h3>Ordering & Payment</h3>
+
+<p><strong>Q: What payment methods do you accept?</strong><br>
+A: We accept all major credit cards, PayPal, and M-Pesa for customers in Kenya.</p>
+
+<p><strong>Q: Is my payment information secure?</strong><br>
+A: Yes, we use industry-standard SSL encryption to protect your payment information.</p>
+
+<p><strong>Q: Can I modify or cancel my order?</strong><br>
+A: Orders can be modified or cancelled within 1 hour of placement. After that, please contact customer service.</p>
+
+<h3>Products & Sizing</h3>
+
+<p><strong>Q: What materials are your shirts made from?</strong><br>
+A: Our shirts are made from high-quality 100% cotton or cotton blends for comfort and durability.</p>
+
+<p><strong>Q: Do your shirts shrink?</strong><br>
+A: Our shirts are pre-shrunk, but we recommend washing in cold water and air drying to maintain size and quality.</p>
+
+<p><strong>Q: Do you offer plus sizes?</strong><br>
+A: Yes, we offer sizes up to 3XL for most designs. Check individual product pages for availability.</p>
+
+<h3>Shipping & Delivery</h3>
+
+<p><strong>Q: How long does shipping take?</strong><br>
+A: Standard shipping takes 5-7 business days. Express and overnight options are available.</p>
+
+<p><strong>Q: Do you ship internationally?</strong><br>
+A: Yes, we ship to several countries including Canada, UK, Australia, and select African countries.</p>
+
+<p><strong>Q: What if my package is lost or stolen?</strong><br>
+A: Contact us immediately. We'll work with the shipping carrier to locate your package or provide a replacement.</p>
+
+<h3>Returns & Exchanges</h3>
+
+<p><strong>Q: How do I return an item?</strong><br>
+A: Contact our customer service team to initiate a return. We'll provide a prepaid return label.</p>
+
+<p><strong>Q: How long do refunds take?</strong><br>
+A: Refunds are processed within 5-7 business days after we receive your return.</p>
+
+<h3>Custom Orders</h3>
+
+<p><strong>Q: Do you offer custom designs?</strong><br>
+A: Yes, we offer custom designs for bulk orders (minimum 12 pieces). Contact us for details.</p>
+
+<p><strong>Q: Can I add my church logo to a shirt?</strong><br>
+A: Absolutely! We love working with churches and ministries. Contact us for custom church apparel options.</p>
+
+<h3>Still have questions?</h3>
+<p>Contact our customer service team at support@faiththreads.com or call 1-800-FAITH-1 (1-800-324-841).</p>`
+            },
+            'contact': {
+                title: 'Contact Us',
+                content: `<h3>Get in Touch</h3>
+<p>We'd love to hear from you! Whether you have questions about our products, need help with an order, or just want to share your faith story, we're here for you.</p>
+
+<h3>Customer Service</h3>
+<p><strong>Email:</strong> support@faiththreads.com<br>
+<strong>Phone:</strong> 1-800-FAITH-1 (1-800-324-841)<br>
+<strong>Hours:</strong> Monday - Friday, 9 AM - 6 PM EST</p>
+
+<h3>Business Inquiries</h3>
+<p><strong>Email:</strong> business@faiththreads.com<br>
+<strong>Phone:</strong> 1-800-324-842</p>
+
+<h3>Wholesale & Custom Orders</h3>
+<p><strong>Email:</strong> wholesale@faiththreads.com<br>
+<strong>Phone:</strong> 1-800-324-843</p>
+
+<h3>Mailing Address</h3>
+<p>Faith Threads<br>
+123 Faith Street<br>
+Hope City, HC 12345<br>
+United States</p>
+
+<h3>Social Media</h3>
+<p>Follow us for daily inspiration and new product updates:</p>
+<ul>
+<li><strong>Facebook:</strong> @FaithThreadsOfficial</li>
+<li><strong>Instagram:</strong> @faiththreads</li>
+<li><strong>Twitter:</strong> @faiththreads</li>
+<li><strong>YouTube:</strong> Faith Threads Official</li>
+</ul>
+
+<h3>Partnership Opportunities</h3>
+<p>Interested in partnering with Faith Threads? We work with churches, ministries, and Christian influencers. Contact us at partnerships@faiththreads.com</p>
+
+<h3>Prayer Requests</h3>
+<p>We believe in the power of prayer. If you have a prayer request, please email us at prayers@faiththreads.com. Our team prays for every request we receive.</p>
+
+<p><em>"And we know that in all things God works for the good of those who love him, who have been called according to his purpose." - Romans 8:28</em></p>`
+            }
+        };
+
+        // Footer links storage
+        let footerLinks = {
+            quick: [
+                { name: 'Home', action: 'scroll', target: '#home' },
+                { name: 'Products', action: 'scroll', target: '#products' },
+                { name: 'About', action: 'page', target: 'about' },
+                { name: 'Contact', action: 'page', target: 'contact' }
+            ],
+            customer: [
+                { name: 'Size Guide', action: 'page', target: 'size-guide' },
+                { name: 'Shipping Info', action: 'page', target: 'shipping' },
+                { name: 'Returns', action: 'page', target: 'returns' },
+                { name: 'FAQ', action: 'page', target: 'faq' }
+            ]
+        };
+
+        // Store settings
+        let storeSettings = {
+            currency: 'USD',
+            taxRate: 8.5,
+            shippingCost: 5.99
+        };
+
+        // Currency formatting function
+        function formatPrice(amount) {
+            const currency = storeSettings.currency;
+            const numAmount = parseFloat(amount);
+            
+            switch (currency) {
+                case 'USD':
+                    return `$${numAmount.toFixed(2)}`;
+                case 'EUR':
+                    return `€${numAmount.toFixed(2)}`;
+                case 'GBP':
+                    return `£${numAmount.toFixed(2)}`;
+                case 'KES':
+                    return `KSh ${Math.round(numAmount * 130).toLocaleString()}`;
+                case 'NGN':
+                    return `₦${Math.round(numAmount * 460).toLocaleString()}`;
+                case 'ZAR':
+                    return `R${(numAmount * 18.5).toFixed(2)}`;
+                default:
+                    return `$${numAmount.toFixed(2)}`;
+            }
+        }
+
+        // Helper function to adjust color brightness
+        function adjustColor(color, amount) {
+            const usePound = color[0] === '#';
+            const col = usePound ? color.slice(1) : color;
+            const num = parseInt(col, 16);
+            let r = (num >> 16) + amount;
+            let g = (num >> 8 & 0x00FF) + amount;
+            let b = (num & 0x0000FF) + amount;
+            r = r > 255 ? 255 : r < 0 ? 0 : r;
+            g = g > 255 ? 255 : g < 0 ? 0 : g;
+            b = b > 255 ? 255 : b < 0 ? 0 : b;
+            return (usePound ? '#' : '') + (r << 16 | g << 8 | b).toString(16).padStart(6, '0');
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            renderCategories();
+            renderProducts();
+            populateCategorySelect();
+            updateCartUI();
+            updateWishlistUI();
+        });
+
+        function renderCategories() {
+            const categoriesContainer = document.getElementById('categories');
+            categoriesContainer.innerHTML = '';
+            
+            categories.forEach((category, index) => {
+                const categoryElement = document.createElement('button');
+                const isActive = category.id === 'all';
+                
+                categoryElement.className = `category-btn px-8 py-4 rounded-2xl transition-all duration-300 font-bold text-white shadow-lg hover:shadow-xl transform hover:-translate-y-2 hover:scale-105 relative overflow-hidden`;
+                
+                // Set individual gradient colors for each category
+                const gradient = `linear-gradient(135deg, ${category.color}, ${adjustColor(category.color, -30)})`;
+                categoryElement.style.background = gradient;
+                
+                if (isActive) {
+                    categoryElement.style.transform = 'translateY(-5px) scale(1.02)';
+                    categoryElement.style.boxShadow = '0 12px 30px rgba(0, 0, 0, 0.25)';
+                }
+                
+                categoryElement.onclick = () => filterProducts(category.id, categoryElement);
+                
+                categoryElement.innerHTML = `
+                    <div class="flex items-center justify-center">
+                        <i class="${category.icon} mr-3 text-xl"></i>
+                        <span class="text-lg font-semibold">${category.name}</span>
+                    </div>
+                `;
+                
+                categoriesContainer.appendChild(categoryElement);
+            });
+        }
+
+        function populateCategorySelect() {
+            const categorySelects = document.querySelectorAll('select[name="productCategory"]');
+            categorySelects.forEach(select => {
+                select.innerHTML = '';
+                categories.filter(cat => cat.id !== 'all').forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.name;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        function renderAdminCategories() {
+            const categoryList = document.getElementById('adminCategoryList');
+            categoryList.innerHTML = '';
+            
+            categories.filter(cat => cat.id !== 'all').forEach(category => {
+                const categoryCard = document.createElement('div');
+                categoryCard.className = 'bg-gray-50 rounded-lg p-4 flex items-center justify-between';
+                
+                categoryCard.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: ${category.color}">
+                            <i class="${category.icon} text-white"></i>
+                        </div>
+                        <div>
+                            <h5 class="font-semibold">${category.name}</h5>
+                            <p class="text-gray-600 text-sm">${products.filter(p => p.category === category.id).length} products</p>
+                        </div>
+                    </div>
+                    <button onclick="deleteCategory('${category.id}')" class="text-red-600 hover:text-red-700 p-2">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                
+                categoryList.appendChild(categoryCard);
+            });
+        }
+
+        function openCategoryModal() {
+            document.getElementById('categoryModal').classList.remove('hidden');
+        }
+
+        function closeCategoryModal() {
+            document.getElementById('categoryModal').classList.add('hidden');
+        }
+
+        function handleCategoryForm(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const colorTheme = formData.get('categoryColor');
+            
+            // Map color names to hex values
+            const colorMap = {
+                purple: '#8b5cf6',
+                blue: '#3b82f6',
+                green: '#10b981',
+                yellow: '#f59e0b',
+                red: '#ef4444',
+                pink: '#ec4899',
+                indigo: '#6366f1',
+                teal: '#14b8a6',
+                orange: '#f97316',
+                gray: '#6b7280'
+            };
+            
+            const categoryData = {
+                id: formData.get('categoryName').toLowerCase().replace(/\s+/g, ''),
+                name: formData.get('categoryName'),
+                icon: formData.get('categoryIcon'),
+                color: colorMap[colorTheme] || '#8b5cf6'
+            };
+            
+            // Check if category already exists
+            if (categories.find(cat => cat.id === categoryData.id)) {
+                showToast('Category already exists!');
+                return;
+            }
+            
+            categories.push(categoryData);
+            renderCategories();
+            populateCategorySelect();
+            closeCategoryModal();
+            showToast('Category added successfully!');
+        }
+
+        function deleteCategory(categoryId) {
+            // Don't allow deletion of default categories
+            const defaultCategories = ['all', 'verses', 'inspirational', 'youth'];
+            if (defaultCategories.includes(categoryId)) {
+                showToast('Cannot delete default categories');
+                return;
+            }
+            
+            // Check if any products use this category
+            const productsInCategory = products.filter(p => p.category === categoryId);
+            if (productsInCategory.length > 0) {
+                const confirmDelete = document.createElement('div');
+                confirmDelete.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+                confirmDelete.innerHTML = `
+                    <div class="bg-white rounded-lg p-6 max-w-md w-full">
+                        <h3 class="text-lg font-bold mb-4">Delete Category</h3>
+                        <p class="text-gray-600 mb-4">This category has ${productsInCategory.length} products. Delete anyway? Products will be moved to "Inspirational" category.</p>
+                        <div class="flex space-x-3">
+                            <button onclick="confirmDeleteCategory('${categoryId}'); this.parentElement.parentElement.parentElement.remove();" class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700">Delete</button>
+                            <button onclick="this.parentElement.parentElement.parentElement.remove();" class="flex-1 border border-gray-300 py-2 rounded-lg hover:bg-gray-50">Cancel</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(confirmDelete);
+                return;
+            }
+            
+            categories = categories.filter(cat => cat.id !== categoryId);
+            renderCategories();
+            populateCategorySelect();
+            renderProducts();
+            showToast('Category deleted successfully!');
+        }
+
+        function confirmDeleteCategory(categoryId) {
+            // Move products to inspirational category
+            const productsInCategory = products.filter(p => p.category === categoryId);
+            productsInCategory.forEach(product => {
+                product.category = 'inspirational';
+            });
+            
+            categories = categories.filter(cat => cat.id !== categoryId);
+            renderCategories();
+            populateCategorySelect();
+            renderProducts();
+            showToast('Category deleted successfully!');
+        }
+
+        function filterProducts(category, clickedButton) {
+            // Reset all category buttons to default state
+            document.querySelectorAll('.category-btn').forEach((btn, index) => {
+                const cat = categories[index];
+                const gradient = `linear-gradient(135deg, ${cat.color}, ${adjustColor(cat.color, -30)})`;
+                btn.style.background = gradient;
+                btn.style.transform = 'translateY(0) scale(1)';
+                btn.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+            });
+            
+            // Highlight active button
+            if (clickedButton) {
+                clickedButton.style.transform = 'translateY(-5px) scale(1.02)';
+                clickedButton.style.boxShadow = '0 12px 30px rgba(0, 0, 0, 0.25)';
+            }
+            
+            if (category === 'all') {
+                filteredProducts = [...products];
+            } else {
+                filteredProducts = products.filter(product => product.category === category);
+            }
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const productGrid = document.getElementById('productGrid');
+            productGrid.innerHTML = '';
+            
+            filteredProducts.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card bg-white rounded-lg shadow-md overflow-hidden';
+                
+                const isWishlisted = wishlist.includes(product.id);
+                
+                productCard.innerHTML = `
+                    <div class="relative">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover">
+                        <button onclick="toggleWishlistProduct(${product.id})" class="absolute top-2 right-2 p-2 rounded-full bg-white shadow-md hover:bg-gray-50 transition duration-300">
+                            <i class="fas fa-heart ${isWishlisted ? 'text-red-500' : 'text-gray-400'}"></i>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <h4 class="font-semibold text-lg mb-2">${product.name}</h4>
+                        <p class="text-gray-600 text-sm mb-3">${product.description}</p>
+                        <div class="flex items-center mb-3">
+                            <div class="flex text-yellow-400">
+                                ${Array(5).fill().map((_, i) => 
+                                    `<i class="fas fa-star ${i < Math.floor(product.rating) ? '' : 'text-gray-300'}"></i>`
+                                ).join('')}
+                            </div>
+                            <span class="text-gray-600 text-sm ml-2">(${product.rating})</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-2xl font-bold text-purple-600">${formatPrice(product.price)}</span>
+                            <div class="flex space-x-2">
+                                <button onclick="quickAddToCart(${product.id})" class="bg-purple-600 text-white px-3 py-2 rounded-lg hover:bg-purple-700 transition duration-300">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </button>
+                                <button onclick="openProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})" class="border border-purple-600 text-purple-600 px-3 py-2 rounded-lg hover:bg-purple-50 transition duration-300">
+                                    View
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                productGrid.appendChild(productCard);
+            });
+        }
+
+        function sortProducts(sortBy) {
+            switch (sortBy) {
+                case 'price-low':
+                    filteredProducts.sort((a, b) => a.price - b.price);
+                    break;
+                case 'price-high':
+                    filteredProducts.sort((a, b) => b.price - a.price);
+                    break;
+                case 'newest':
+                    filteredProducts.sort((a, b) => b.id - a.id);
+                    break;
+                default:
+                    filteredProducts = [...products].filter(p => 
+                        document.querySelector('.category-btn.active') ? 
+                        p.category === 'all' : true
+                    );
+            }
+            renderProducts();
+        }
+
+        function searchProducts(query) {
+            if (!query.trim()) {
+                filteredProducts = [...products];
+            } else {
+                filteredProducts = products.filter(product => 
+                    product.name.toLowerCase().includes(query.toLowerCase()) ||
+                    product.description.toLowerCase().includes(query.toLowerCase())
+                );
+            }
+            renderProducts();
+        }
+
+        function openProductModal(product) {
+            currentProduct = product;
+            document.getElementById('modalTitle').textContent = product.name;
+            document.getElementById('modalImage').src = product.image;
+            document.getElementById('modalPrice').textContent = formatPrice(product.price);
+            document.getElementById('modalDescription').textContent = product.description;
+            document.getElementById('quantityInput').value = 1;
+            
+            const wishlistBtn = document.getElementById('wishlistModalBtn');
+            wishlistBtn.innerHTML = wishlist.includes(product.id) ? 
+                '<i class="fas fa-heart text-red-500"></i>' : 
+                '<i class="fas fa-heart text-gray-400"></i>';
+            
+            document.getElementById('productModal').classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            document.getElementById('productModal').classList.add('hidden');
+            currentProduct = null;
+        }
+
+        function increaseQuantity() {
+            const input = document.getElementById('quantityInput');
+            input.value = parseInt(input.value) + 1;
+        }
+
+        function decreaseQuantity() {
+            const input = document.getElementById('quantityInput');
+            if (parseInt(input.value) > 1) {
+                input.value = parseInt(input.value) - 1;
+            }
+        }
+
+        function addToCart() {
+            if (!currentProduct) return;
+            
+            const size = document.getElementById('sizeSelect').value;
+            const quantity = parseInt(document.getElementById('quantityInput').value);
+            
+            const cartItem = {
+                id: Date.now(),
+                productId: currentProduct.id,
+                name: currentProduct.name,
+                price: currentProduct.price,
+                image: currentProduct.image,
+                size: size,
+                quantity: quantity
+            };
+            
+            cart.push(cartItem);
+            updateCartUI();
+            closeProductModal();
+            
+            // Show success message
+            showToast('Added to cart successfully!');
+        }
+
+        function quickAddToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            const cartItem = {
+                id: Date.now(),
+                productId: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.image,
+                size: 'M',
+                quantity: 1
+            };
+            
+            cart.push(cartItem);
+            updateCartUI();
+            showToast('Added to cart successfully!');
+        }
+
+        function toggleWishlistProduct(productId) {
+            if (wishlist.includes(productId)) {
+                wishlist = wishlist.filter(id => id !== productId);
+            } else {
+                wishlist.push(productId);
+            }
+            updateWishlistUI();
+            renderProducts();
+        }
+
+        function toggleWishlist() {
+            if (!currentProduct) return;
+            
+            if (wishlist.includes(currentProduct.id)) {
+                wishlist = wishlist.filter(id => id !== currentProduct.id);
+            } else {
+                wishlist.push(currentProduct.id);
+            }
+            
+            const wishlistBtn = document.getElementById('wishlistModalBtn');
+            wishlistBtn.innerHTML = wishlist.includes(currentProduct.id) ? 
+                '<i class="fas fa-heart text-red-500"></i>' : 
+                '<i class="fas fa-heart text-gray-400"></i>';
+            
+            updateWishlistUI();
+        }
+
+        function updateCartUI() {
+            const cartCount = document.getElementById('cartCount');
+            const cartItems = document.getElementById('cartItems');
+            const cartFooter = document.getElementById('cartFooter');
+            const cartTotal = document.getElementById('cartTotal');
+            
+            if (cart.length === 0) {
+                cartCount.classList.add('hidden');
+                cartItems.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-shopping-cart text-4xl mb-4"></i>
+                        <p>Your cart is empty</p>
+                    </div>
+                `;
+                cartFooter.classList.add('hidden');
+            } else {
+                cartCount.textContent = cart.length;
+                cartCount.classList.remove('hidden');
+                
+                cartItems.innerHTML = cart.map(item => `
+                    <div class="flex items-center space-x-3 py-3 border-b">
+                        <img src="${item.image}" alt="${item.name}" class="w-12 md:w-16 h-12 md:h-16 object-cover rounded">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-semibold text-sm md:text-base truncate">${item.name}</h4>
+                            <p class="text-xs md:text-sm text-gray-600">Size: ${item.size} • Qty: ${item.quantity}</p>
+                            <p class="font-semibold text-sm md:text-base text-purple-600">${formatPrice(item.price * item.quantity)}</p>
+                        </div>
+                        <button onclick="removeFromCart(${item.id})" class="text-red-500 hover:text-red-700 text-xs md:text-sm p-2 touch-manipulation">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `).join('');
+                
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                cartTotal.textContent = formatPrice(total);
+                cartFooter.classList.remove('hidden');
+            }
+        }
+
+        function updateWishlistUI() {
+            const wishlistCount = document.getElementById('wishlistCount');
+            
+            if (wishlist.length === 0) {
+                wishlistCount.classList.add('hidden');
+            } else {
+                wishlistCount.textContent = wishlist.length;
+                wishlistCount.classList.remove('hidden');
+            }
+        }
+
+        function removeFromCart(itemId) {
+            cart = cart.filter(item => item.id !== itemId);
+            updateCartUI();
+        }
+
+        function openCart() {
+            document.getElementById('cartSidebar').classList.add('open');
+        }
+
+        function closeCart() {
+            document.getElementById('cartSidebar').classList.remove('open');
+        }
+
+        function proceedToCheckout() {
+            if (cart.length === 0) return;
+            
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            document.getElementById('checkoutTotal').textContent = formatPrice(total);
+            document.getElementById('checkoutModal').classList.remove('hidden');
+            closeCart();
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkoutModal').classList.add('hidden');
+        }
+
+        function handleCheckout(e) {
+            e.preventDefault();
+            
+            const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+            
+            if (paymentMethod === 'mpesa') {
+                // Open M-Pesa payment modal
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const kshAmount = Math.round(total * 130); // Convert USD to KSh (approximate rate)
+                
+                document.getElementById('mpesaAmount').textContent = `KSh ${kshAmount.toLocaleString()}`;
+                document.getElementById('mpesaRef').textContent = `FT-${Date.now().toString().slice(-6)}`;
+                document.getElementById('promptAmount').textContent = kshAmount.toLocaleString();
+                document.getElementById('promptRef').textContent = document.getElementById('mpesaRef').textContent;
+                
+                closeCheckoutModal();
+                document.getElementById('mpesaModal').classList.remove('hidden');
+                return;
+            }
+            
+            // Handle other payment methods
+            const submitBtn = document.getElementById('checkoutBtnText');
+            const spinner = document.getElementById('checkoutSpinner');
+            
+            submitBtn.classList.add('hidden');
+            spinner.classList.remove('hidden');
+            
+            // Simulate processing
+            setTimeout(() => {
+                closeCheckoutModal();
+                showSuccessModal(paymentMethod);
+                cart = [];
+                updateCartUI();
+                
+                submitBtn.classList.remove('hidden');
+                spinner.classList.add('hidden');
+            }, 2000);
+        }
+
+        function sendMpesaPrompt() {
+            const phoneNumber = document.getElementById('mpesaPhone').value;
+            
+            if (!phoneNumber || phoneNumber.length < 9) {
+                showToast('Please enter a valid phone number');
+                return;
+            }
+            
+            // Show instructions first
+            document.getElementById('mpesaInstructions').classList.remove('hidden');
+            document.getElementById('mpesaPayBtn').disabled = true;
+            document.getElementById('mpesaPayBtn').textContent = 'Sending...';
+            
+            // After 2 seconds, show the prompt simulation
+            setTimeout(() => {
+                document.getElementById('mpesaInstructions').classList.add('hidden');
+                document.getElementById('mpesaPrompt').classList.remove('hidden');
+                
+                // Simulate payment processing (5 seconds)
+                setTimeout(() => {
+                    const kshAmount = document.getElementById('mpesaAmount').textContent;
+                    const transactionId = 'QH' + Math.random().toString(36).substr(2, 8).toUpperCase();
+                    
+                    closeMpesaModal();
+                    showSuccessModal('mpesa', {
+                        transactionId: transactionId,
+                        amount: kshAmount,
+                        phone: '+254' + phoneNumber
+                    });
+                    
+                    cart = [];
+                    updateCartUI();
+                }, 5000);
+            }, 2000);
+        }
+
+        function closeMpesaModal() {
+            document.getElementById('mpesaModal').classList.add('hidden');
+            document.getElementById('mpesaInstructions').classList.add('hidden');
+            document.getElementById('mpesaPrompt').classList.add('hidden');
+            document.getElementById('mpesaPayBtn').disabled = false;
+            document.getElementById('mpesaPayBtn').textContent = 'Send Payment Prompt';
+            document.getElementById('mpesaPhone').value = '';
+        }
+
+        function showSuccessModal(paymentMethod, details = null) {
+            // Generate order number
+            const orderNumber = 'FT-' + String(orders.length + 1).padStart(6, '0');
+            currentOrderNumber = orderNumber;
+            
+            // Create order object
+            const order = {
+                orderNumber: orderNumber,
+                date: new Date().toLocaleDateString(),
+                items: [...cart],
+                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                paymentMethod: paymentMethod,
+                status: 'confirmed',
+                trackingNumber: 'FE' + Math.random().toString(36).substr(2, 8).toUpperCase(),
+                estimatedDelivery: getEstimatedDelivery(),
+                timeline: generateOrderTimeline()
+            };
+            
+            if (paymentMethod === 'mpesa' && details) {
+                order.transactionId = details.transactionId;
+                order.paidAmount = details.amount;
+                order.paymentDetails = 'M-Pesa (' + details.phone + ')';
+                
+                document.getElementById('transactionId').textContent = details.transactionId;
+                document.getElementById('paidAmount').textContent = details.amount;
+                document.getElementById('paymentMethod').textContent = 'M-Pesa (' + details.phone + ')';
+            } else {
+                order.transactionId = 'TXN' + Math.random().toString(36).substr(2, 8).toUpperCase();
+                order.paidAmount = formatPrice(order.total);
+                order.paymentDetails = paymentMethod === 'card' ? 'Credit Card' : 'PayPal';
+                
+                document.getElementById('transactionId').textContent = order.transactionId;
+                document.getElementById('paidAmount').textContent = formatPrice(order.total);
+                document.getElementById('paymentMethod').textContent = order.paymentDetails;
+            }
+            
+            // Store the order
+            orders.push(order);
+            
+            // Update UI
+            document.getElementById('orderNumber').textContent = orderNumber;
+            document.getElementById('estimatedDelivery').textContent = order.estimatedDelivery;
+            
+            document.getElementById('successModal').classList.remove('hidden');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+        }
+
+        function trackOrder() {
+            closeSuccessModal();
+            openTrackingModal();
+            if (currentOrderNumber) {
+                document.getElementById('trackingInput').value = currentOrderNumber;
+                searchOrder();
+            }
+        }
+
+        function getEstimatedDelivery() {
+            const deliveryDate = new Date();
+            deliveryDate.setDate(deliveryDate.getDate() + Math.floor(Math.random() * 3) + 5); // 5-7 days
+            return deliveryDate.toLocaleDateString();
+        }
+
+        function generateOrderTimeline() {
+            const now = new Date();
+            const timeline = [
+                {
+                    status: 'Order Confirmed',
+                    description: 'Your order has been received and confirmed',
+                    time: now.toLocaleString(),
+                    completed: true,
+                    icon: 'fas fa-check-circle'
+                },
+                {
+                    status: 'Processing',
+                    description: 'Your order is being prepared for shipment',
+                    time: new Date(now.getTime() + 2 * 60 * 60 * 1000).toLocaleString(), // +2 hours
+                    completed: Math.random() > 0.5,
+                    icon: 'fas fa-cog'
+                },
+                {
+                    status: 'Shipped',
+                    description: 'Your order has been shipped and is on its way',
+                    time: new Date(now.getTime() + 24 * 60 * 60 * 1000).toLocaleString(), // +1 day
+                    completed: false,
+                    icon: 'fas fa-shipping-fast'
+                },
+                {
+                    status: 'Out for Delivery',
+                    description: 'Your order is out for delivery',
+                    time: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000).toLocaleString(), // +5 days
+                    completed: false,
+                    icon: 'fas fa-truck'
+                },
+                {
+                    status: 'Delivered',
+                    description: 'Your order has been delivered',
+                    time: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toLocaleString(), // +7 days
+                    completed: false,
+                    icon: 'fas fa-home'
+                }
+            ];
+            
+            return timeline;
+        }
+
+        function openTrackingModal() {
+            document.getElementById('trackingModal').classList.remove('hidden');
+            document.getElementById('orderInfo').classList.add('hidden');
+            document.getElementById('noOrderFound').classList.add('hidden');
+        }
+
+        function closeTrackingModal() {
+            document.getElementById('trackingModal').classList.add('hidden');
+        }
+
+        function searchOrder() {
+            const orderNumber = document.getElementById('trackingInput').value.trim();
+            
+            if (!orderNumber) {
+                showToast('Please enter an order number');
+                return;
+            }
+            
+            const order = orders.find(o => o.orderNumber.toLowerCase() === orderNumber.toLowerCase());
+            
+            if (order) {
+                displayOrderInfo(order);
+            } else {
+                // Show sample order for demo purposes if order not found
+                if (orderNumber.toLowerCase().startsWith('ft-')) {
+                    displaySampleOrder(orderNumber);
+                } else {
+                    document.getElementById('orderInfo').classList.add('hidden');
+                    document.getElementById('noOrderFound').classList.remove('hidden');
+                }
+            }
+        }
+
+        function displayOrderInfo(order) {
+            document.getElementById('noOrderFound').classList.add('hidden');
+            
+            // Populate order details
+            document.getElementById('trackOrderNumber').textContent = order.orderNumber;
+            document.getElementById('trackOrderDate').textContent = order.date;
+            document.getElementById('trackOrderTotal').textContent = formatPrice(order.total);
+            document.getElementById('trackEstimatedDelivery').textContent = order.estimatedDelivery;
+            document.getElementById('trackingNumber').textContent = order.trackingNumber;
+            
+            // Populate timeline
+            displayTimeline(order.timeline);
+            
+            // Populate order items
+            displayOrderItems(order.items);
+            
+            document.getElementById('orderInfo').classList.remove('hidden');
+        }
+
+        function displaySampleOrder(orderNumber) {
+            document.getElementById('noOrderFound').classList.add('hidden');
+            
+            // Create sample order data
+            const sampleOrder = {
+                orderNumber: orderNumber,
+                date: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+                total: 45.97 + Math.random() * 50,
+                estimatedDelivery: getEstimatedDelivery(),
+                trackingNumber: 'FE' + Math.random().toString(36).substr(2, 8).toUpperCase(),
+                timeline: generateOrderTimeline(),
+                items: [
+                    {
+                        name: 'Faith Over Fear',
+                        price: 24.99,
+                        quantity: 1,
+                        size: 'M',
+                        image: products[0].image
+                    },
+                    {
+                        name: 'John 3:16 Classic',
+                        price: 22.99,
+                        quantity: 1,
+                        size: 'L',
+                        image: products[1].image
+                    }
+                ]
+            };
+            
+            displayOrderInfo(sampleOrder);
+        }
+
+        function displayTimeline(timeline) {
+            const timelineContainer = document.getElementById('statusTimeline');
+            timelineContainer.innerHTML = '';
+            
+            timeline.forEach((step, index) => {
+                const isLast = index === timeline.length - 1;
+                const stepElement = document.createElement('div');
+                stepElement.className = 'flex items-start mb-6';
+                
+                stepElement.innerHTML = `
+                    <div class="flex flex-col items-center mr-4">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center ${
+                            step.completed ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
+                        }">
+                            <i class="${step.icon}"></i>
+                        </div>
+                        ${!isLast ? `<div class="w-0.5 h-12 ${step.completed ? 'bg-green-500' : 'bg-gray-200'} mt-2"></div>` : ''}
+                    </div>
+                    <div class="flex-1">
+                        <h5 class="font-semibold ${step.completed ? 'text-green-600' : 'text-gray-600'}">${step.status}</h5>
+                        <p class="text-sm text-gray-600 mb-1">${step.description}</p>
+                        <p class="text-xs text-gray-500">${step.completed ? step.time : 'Estimated: ' + step.time}</p>
+                    </div>
+                `;
+                
+                timelineContainer.appendChild(stepElement);
+            });
+        }
+
+        function displayOrderItems(items) {
+            const itemsContainer = document.getElementById('trackingOrderItems');
+            itemsContainer.innerHTML = '';
+            
+            items.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'flex items-center space-x-4 p-4 bg-gray-50 rounded-lg';
+                
+                itemElement.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded">
+                    <div class="flex-1">
+                        <h5 class="font-semibold">${item.name}</h5>
+                        <p class="text-sm text-gray-600">Size: ${item.size} • Quantity: ${item.quantity}</p>
+                        <p class="text-sm font-semibold text-purple-600">${formatPrice(item.price * item.quantity)}</p>
+                    </div>
+                `;
+                
+                itemsContainer.appendChild(itemElement);
+            });
+        }
+
+        function scrollToProducts() {
+            document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Newsletter Functions
+        function handleNewsletterSignup(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('newsletterEmail').value;
+            
+            // Check if email already exists
+            if (emailSubscribers.includes(email)) {
+                showToast('You are already subscribed!');
+                return;
+            }
+            
+            // Add to subscribers list
+            emailSubscribers.push(email);
+            
+            // Update subscriber count
+            const currentCount = parseInt(document.getElementById('subscriberCount').textContent.replace(',', ''));
+            document.getElementById('subscriberCount').textContent = (currentCount + 1).toLocaleString();
+            
+            // Clear form
+            document.getElementById('newsletterEmail').value = '';
+            
+            // Show success message
+            showNewsletterSuccess(email);
+        }
+
+        function showNewsletterSuccess(email) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-lg max-w-md w-full p-6 text-center">
+                    <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-check text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-green-600">Welcome to Faith Threads!</h3>
+                    <p class="text-gray-600 mb-4">Thank you for subscribing! We've sent a welcome email to:</p>
+                    <p class="font-semibold text-purple-600 mb-6">${email}</p>
+                    
+                    <div class="bg-purple-50 rounded-lg p-4 mb-6">
+                        <h4 class="font-semibold text-purple-700 mb-2">What's Next?</h4>
+                        <ul class="text-sm text-purple-600 space-y-1">
+                            <li>✨ Weekly inspiration and Bible verses</li>
+                            <li>🎁 Exclusive subscriber-only discounts</li>
+                            <li>👕 First access to new product launches</li>
+                            <li>📖 Free faith-based content and resources</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <button onclick="this.parentElement.parentElement.parentElement.remove(); scrollToProducts();" class="flex-1 bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition duration-300">
+                            Start Shopping
+                        </button>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove();" class="flex-1 border border-gray-300 py-2 rounded-lg hover:bg-gray-50 transition duration-300">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+// Admin Panel Functions
+        function openAdminPanel() {
+            document.getElementById('adminPasswordModal').classList.remove('hidden');
+            document.getElementById('adminPassword').focus();
+        }
+
+        function closeAdminPasswordModal() {
+            document.getElementById('adminPasswordModal').classList.add('hidden');
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('passwordError').classList.add('hidden');
+        }
+
+        function checkAdminPassword(event) {
+            event.preventDefault();
+            const password = document.getElementById('adminPassword').value;
+            
+            if (password === 'admin123') {
+                document.getElementById('adminPasswordModal').classList.add('hidden');
+                document.getElementById('adminPanel').classList.remove('hidden');
+                document.getElementById('adminPassword').value = '';
+                document.getElementById('passwordError').classList.add('hidden');
+                loadAdminProducts();
+            } else {
+                document.getElementById('passwordError').classList.remove('hidden');
+                document.getElementById('adminPassword').value = '';
+                document.getElementById('adminPassword').focus();
+            }
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('adminPanel').classList.add('hidden');
+        }
+        
+        function switchAdminTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.admin-tab').forEach(btn => {
+                btn.classList.remove('active', 'border-purple-500', 'text-purple-600');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            event.target.classList.add('active', 'border-purple-500', 'text-purple-600');
+            event.target.classList.remove('border-transparent', 'text-gray-500');
+            
+            // Show/hide content
+            document.querySelectorAll('.admin-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            document.getElementById('admin' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.remove('hidden');
+            
+            // Load specific content
+            if (tab === 'categories') {
+                renderAdminCategories();
+            } else if (tab === 'subscribers') {
+                renderSubscribers();
+            } else if (tab === 'pages') {
+                renderFooterLinksEditor();
+            }
+        }
+
+        function renderSubscribers() {
+            const subscribersList = document.getElementById('subscribersList');
+            const totalSubscribers = document.getElementById('totalSubscribers');
+            const subscriberCount = document.getElementById('subscriberCount');
+            
+            totalSubscribers.textContent = emailSubscribers.length;
+            subscriberCount.textContent = emailSubscribers.length;
+            
+            if (emailSubscribers.length === 0) {
+                subscribersList.innerHTML = `
+                    <div class="p-8 text-center text-gray-500">
+                        <i class="fas fa-envelope text-4xl mb-4"></i>
+                        <p>No subscribers yet</p>
+                        <p class="text-sm">Subscribers will appear here when they sign up for your newsletter</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            subscribersList.innerHTML = emailSubscribers.map((email, index) => `
+                <div class="p-4 flex items-center justify-between hover:bg-gray-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-purple-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold">${email}</p>
+                            <p class="text-sm text-gray-600">Subscriber #${index + 1}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Active</span>
+                        <button onclick="removeSubscriber('${email}')" class="text-red-600 hover:text-red-700 p-2">
+                            <i class="fas fa-trash text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function searchSubscribers(query) {
+            const subscribersList = document.getElementById('subscribersList');
+            const subscriberCount = document.getElementById('subscriberCount');
+            
+            if (!query.trim()) {
+                renderSubscribers();
+                return;
+            }
+            
+            const filteredSubscribers = emailSubscribers.filter(email => 
+                email.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            subscriberCount.textContent = filteredSubscribers.length;
+            
+            if (filteredSubscribers.length === 0) {
+                subscribersList.innerHTML = `
+                    <div class="p-8 text-center text-gray-500">
+                        <i class="fas fa-search text-4xl mb-4"></i>
+                        <p>No subscribers found</p>
+                        <p class="text-sm">Try a different search term</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            subscribersList.innerHTML = filteredSubscribers.map((email, index) => `
+                <div class="p-4 flex items-center justify-between hover:bg-gray-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-purple-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold">${email}</p>
+                            <p class="text-sm text-gray-600">Subscriber #${emailSubscribers.indexOf(email) + 1}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Active</span>
+                        <button onclick="removeSubscriber('${email}')" class="text-red-600 hover:text-red-700 p-2">
+                            <i class="fas fa-trash text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function removeSubscriber(email) {
+            const confirmDelete = document.createElement('div');
+            confirmDelete.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+            confirmDelete.innerHTML = `
+                <div class="bg-white rounded-lg p-6 max-w-md w-full">
+                    <h3 class="text-lg font-bold mb-4">Remove Subscriber</h3>
+                    <p class="text-gray-600 mb-4">Are you sure you want to remove <strong>${email}</strong> from your subscriber list?</p>
+                    <div class="flex space-x-3">
+                        <button onclick="confirmRemoveSubscriber('${email}'); this.parentElement.parentElement.parentElement.remove();" class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700">Remove</button>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove();" class="flex-1 border border-gray-300 py-2 rounded-lg hover:bg-gray-50">Cancel</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(confirmDelete);
+        }
+
+        function confirmRemoveSubscriber(email) {
+            emailSubscribers = emailSubscribers.filter(e => e !== email);
+            renderSubscribers();
+            showToast('Subscriber removed successfully!');
+        }
+
+        function exportSubscribers() {
+            if (emailSubscribers.length === 0) {
+                showToast('No subscribers to export');
+                return;
+            }
+            
+            const csvContent = 'Email,Subscriber Number,Status\n' + 
+                emailSubscribers.map((email, index) => 
+                    `${email},${index + 1},Active`
+                ).join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `faith-threads-subscribers-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showToast('Subscribers exported successfully!');
+        }
+
+        function loadAdminProducts() {
+            const productList = document.getElementById('adminProductList');
+            productList.innerHTML = '';
+            
+            products.forEach(product => {
+                const productItem = document.createElement('div');
+                productItem.className = 'bg-gray-50 rounded-lg p-4 flex items-center justify-between';
+                
+                productItem.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <img src="${product.image}" alt="${product.name}" class="w-16 h-16 object-cover rounded">
+                        <div>
+                            <h5 class="font-semibold">${product.name}</h5>
+                            <p class="text-gray-600">${formatPrice(product.price)} • ${product.category}</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="editProduct(${product.id})" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition duration-300">
+                            <i class="fas fa-edit mr-1"></i>Edit
+                        </button>
+                        <button onclick="deleteProduct(${product.id})" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition duration-300">
+                            <i class="fas fa-trash mr-1"></i>Delete
+                        </button>
+                    </div>
+                `;
+                
+                productList.appendChild(productItem);
+            });
+        }
+
+        function showAddProduct() {
+            editingProductId = null;
+            document.getElementById('productFormTitle').textContent = 'Add New Product';
+            document.getElementById('productFormSubmitText').textContent = 'Add Product';
+            document.getElementById('productForm').reset();
+            document.getElementById('imagePreview').classList.add('hidden');
+            document.getElementById('imageUpload').classList.remove('hidden');
+            document.getElementById('productFormModal').classList.remove('hidden');
+        }
+
+        function editProduct(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            editingProductId = productId;
+            document.getElementById('productFormTitle').textContent = 'Edit Product';
+            document.getElementById('productFormSubmitText').textContent = 'Update Product';
+            
+            document.querySelector('input[name="productName"]').value = product.name;
+            document.querySelector('input[name="productPrice"]').value = product.price;
+            document.querySelector('select[name="productCategory"]').value = product.category;
+            document.querySelector('textarea[name="productDescription"]').value = product.description;
+            
+            // Show current image
+            document.getElementById('previewImg').src = product.image;
+            document.getElementById('imagePreview').classList.remove('hidden');
+            document.getElementById('imageUpload').classList.add('hidden');
+            
+            document.getElementById('productFormModal').classList.remove('hidden');
+        }
+
+        function deleteProduct(productId) {
+            const confirmDelete = document.createElement('div');
+            confirmDelete.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+            confirmDelete.innerHTML = `
+                <div class="bg-white rounded-lg p-6 max-w-md w-full">
+                    <h3 class="text-lg font-bold mb-4">Delete Product</h3>
+                    <p class="text-gray-600 mb-4">Are you sure you want to delete this product? This action cannot be undone.</p>
+                    <div class="flex space-x-3">
+                        <button onclick="confirmDeleteProduct(${productId}); this.parentElement.parentElement.parentElement.remove();" class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700">Delete</button>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove();" class="flex-1 border border-gray-300 py-2 rounded-lg hover:bg-gray-50">Cancel</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(confirmDelete);
+        }
+
+        function confirmDeleteProduct(productId) {
+            const index = products.findIndex(p => p.id === productId);
+            if (index > -1) {
+                products.splice(index, 1);
+                filteredProducts = [...products];
+                renderProducts();
+                loadAdminProducts();
+                showToast('Product deleted successfully!');
+            }
+        }
+
+        function closeProductForm() {
+            document.getElementById('productFormModal').classList.add('hidden');
+            editingProductId = null;
+        }
+
+        function handleImageUpload(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('imagePreview').classList.remove('hidden');
+                    document.getElementById('imageUpload').classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeImage() {
+            document.getElementById('productImage').value = '';
+            document.getElementById('imagePreview').classList.add('hidden');
+            document.getElementById('imageUpload').classList.remove('hidden');
+        }
+
+        function handleProductForm(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const productData = {
+                name: formData.get('productName'),
+                price: parseFloat(formData.get('productPrice')),
+                category: formData.get('productCategory'),
+                description: formData.get('productDescription'),
+                rating: 4.5 + Math.random() * 0.5
+            };
+            
+            // Handle image
+            const previewImg = document.getElementById('previewImg');
+            if (previewImg.src && previewImg.src !== window.location.href) {
+                productData.image = previewImg.src;
+            } else {
+                // Generate a simple colored placeholder if no image
+                const colors = ['#667eea', '#764ba2', '#48bb78', '#ed64a6', '#f6ad55', '#38b2ac'];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                productData.image = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='${color.replace('#', '%23')}'/%3E%3Ctext x='150' y='150' font-family='Arial, sans-serif' font-size='20' font-weight='bold' text-anchor='middle' fill='white'%3E${productData.name}%3C/text%3E%3C/svg%3E`;
+            }
+            
+            if (editingProductId) {
+                // Update existing product
+                const index = products.findIndex(p => p.id === editingProductId);
+                if (index > -1) {
+                    products[index] = { ...products[index], ...productData };
+                    showToast('Product updated successfully!');
+                }
+            } else {
+                // Add new product
+                productData.id = Math.max(...products.map(p => p.id)) + 1;
+                products.push(productData);
+                showToast('Product added successfully!');
+            }
+            
+            filteredProducts = [...products];
+            renderProducts();
+            loadAdminProducts();
+            closeProductForm();
+        }
+
+        function saveContent() {
+            const storeName = document.getElementById('storeName').value;
+            const heroTitle = document.getElementById('heroTitle').value;
+            const heroSubtitle = document.getElementById('heroSubtitle').value;
+            const footerDesc = document.getElementById('footerDesc').value;
+            
+            // Update store name in header
+            document.querySelector('h1').textContent = storeName;
+            
+            // Update hero section
+            document.querySelector('.hero-gradient h2').textContent = heroTitle;
+            document.querySelector('.hero-gradient p').textContent = heroSubtitle;
+            
+            // Update footer description
+            document.querySelector('footer p').textContent = footerDesc;
+            
+            showToast('Content updated successfully!');
+        }
+
+        function saveSettings() {
+            storeSettings.currency = document.getElementById('currency').value;
+            storeSettings.taxRate = parseFloat(document.getElementById('taxRate').value);
+            storeSettings.shippingCost = parseFloat(document.getElementById('shippingCost').value);
+            
+            // Re-render products and cart to update currency display
+            renderProducts();
+            updateCartUI();
+            
+            showToast('Settings saved successfully!');
+        }
+
+        // Page Management Functions
+        function showPage(pageId) {
+            const page = pageContent[pageId];
+            if (!page) {
+                showToast('Page not found');
+                return;
+            }
+            
+            document.getElementById('displayTitle').textContent = page.title;
+            document.getElementById('displayContent').innerHTML = page.content;
+            document.getElementById('pageDisplayModal').classList.remove('hidden');
+        }
+
+        function closePageDisplay() {
+            document.getElementById('pageDisplayModal').classList.add('hidden');
+        }
+
+        function editPage(pageId) {
+            const page = pageContent[pageId];
+            if (!page) {
+                showToast('Page not found');
+                return;
+            }
+            
+            currentEditingPage = pageId;
+            document.getElementById('pageEditorTitle').textContent = `Edit ${page.title}`;
+            document.getElementById('pageTitle').value = page.title;
+            document.getElementById('pageContent').value = page.content;
+            document.getElementById('pageEditorModal').classList.remove('hidden');
+        }
+
+        function closePageEditor() {
+            document.getElementById('pageEditorModal').classList.add('hidden');
+            currentEditingPage = null;
+        }
+
+        function savePageContent(e) {
+            e.preventDefault();
+            
+            if (!currentEditingPage) return;
+            
+            const title = document.getElementById('pageTitle').value;
+            const content = document.getElementById('pageContent').value;
+            
+            pageContent[currentEditingPage] = {
+                title: title,
+                content: content
+            };
+            
+            closePageEditor();
+            showToast('Page updated successfully!');
+        }
+
+        function previewPage() {
+            const title = document.getElementById('pageTitle').value;
+            const content = document.getElementById('pageContent').value;
+            
+            document.getElementById('previewTitle').textContent = title;
+            document.getElementById('previewContent').innerHTML = content;
+            document.getElementById('pagePreviewModal').classList.remove('hidden');
+        }
+
+        function closePagePreview() {
+            document.getElementById('pagePreviewModal').classList.add('hidden');
+        }
+
+        function renderFooterLinksEditor() {
+            renderFooterLinkSection('quick', 'quickLinksEditor');
+            renderFooterLinkSection('customer', 'customerLinksEditor');
+        }
+
+        function renderFooterLinkSection(section, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            footerLinks[section].forEach((link, index) => {
+                const linkElement = document.createElement('div');
+                linkElement.className = 'flex items-center justify-between bg-white border rounded-lg p-3';
+                
+                linkElement.innerHTML = `
+                    <div class="flex-1">
+                        <input type="text" value="${link.name}" onchange="updateFooterLink('${section}', ${index}, 'name', this.value)" class="w-full border-0 focus:outline-none font-medium">
+                        <p class="text-xs text-gray-500 mt-1">${link.action === 'scroll' ? 'Scrolls to: ' + link.target : 'Opens page: ' + link.target}</p>
+                    </div>
+                    <button onclick="removeFooterLink('${section}', ${index})" class="text-red-600 hover:text-red-700 p-2">
+                        <i class="fas fa-trash text-sm"></i>
+                    </button>
+                `;
+                
+                container.appendChild(linkElement);
+            });
+        }
+
+        function updateFooterLink(section, index, field, value) {
+            footerLinks[section][index][field] = value;
+            updateFooterDisplay();
+        }
+
+        function removeFooterLink(section, index) {
+            footerLinks[section].splice(index, 1);
+            renderFooterLinkSection(section, section === 'quick' ? 'quickLinksEditor' : 'customerLinksEditor');
+            updateFooterDisplay();
+        }
+
+        function addFooterLink(section) {
+            const linkName = section === 'quick' ? 'New Link' : 'New Service';
+            const newLink = {
+                name: linkName,
+                action: 'page',
+                target: 'about'
+            };
+            
+            footerLinks[section].push(newLink);
+            renderFooterLinkSection(section, section === 'quick' ? 'quickLinksEditor' : 'customerLinksEditor');
+            updateFooterDisplay();
+        }
+
+        function updateFooterDisplay() {
+            // Update Quick Links
+            const quickLinksFooter = document.getElementById('quickLinksFooter');
+            quickLinksFooter.innerHTML = '';
+            
+            footerLinks.quick.forEach(link => {
+                const li = document.createElement('li');
+                if (link.action === 'scroll') {
+                    li.innerHTML = `<a href="${link.target}" class="hover:text-white transition duration-300">${link.name}</a>`;
+                } else {
+                    li.innerHTML = `<a href="javascript:void(0)" onclick="showPage('${link.target}')" class="hover:text-white transition duration-300">${link.name}</a>`;
+                }
+                quickLinksFooter.appendChild(li);
+            });
+            
+            // Update Customer Service Links
+            const customerLinksFooter = document.getElementById('customerLinksFooter');
+            customerLinksFooter.innerHTML = '';
+            
+            footerLinks.customer.forEach(link => {
+                const li = document.createElement('li');
+                if (link.action === 'scroll') {
+                    li.innerHTML = `<a href="${link.target}" class="hover:text-white transition duration-300">${link.name}</a>`;
+                } else {
+                    li.innerHTML = `<a href="javascript:void(0)" onclick="showPage('${link.target}')" class="hover:text-white transition duration-300">${link.name}</a>`;
+                }
+                customerLinksFooter.appendChild(li);
+            });
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9934a47bb65b739a',t:'MTc2MTI1ODI0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script> <!-- WhatsApp Floating Button -->
+<div class="fixed bottom-6 right-6 z-40">
+    <button onclick="openWhatsApp()" class="bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-110 group">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+        </svg>
+    </button>
+    
+    <div class="absolute bottom-full right-0 mb-2 bg-gray-800 text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+        Chat with us on WhatsApp
+        <div class="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+    </div>
+</div>
+
+<script>
+    function openWhatsApp() {
+        const phoneNumber = '254733299962'; // Replace with your WhatsApp business number
+        const message = 'Hello! I have a question about Gospel Gear products.';
+        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    }
+</script>
+</body>
+</html>
